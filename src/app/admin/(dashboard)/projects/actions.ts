@@ -188,3 +188,19 @@ export async function deleteProjectImage(imageId: string) {
   revalidatePath("/du-an");
   revalidatePath("/", "layout");
 }
+
+export async function deleteProject(id: string) {
+  const user = await getCurrentUser();
+  if (!user || !["SUPER_ADMIN", "ADMIN"].includes(user.role)) {
+    throw new Error("Không có quyền");
+  }
+
+  // Delete related images first, then the project
+  await prisma.projectImage.deleteMany({ where: { projectId: id } });
+  await prisma.project.delete({ where: { id } });
+
+  revalidatePath("/admin/projects");
+  revalidatePath("/du-an");
+  revalidatePath("/", "layout");
+  redirect("/admin/projects");
+}

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/db";
 import { Plus } from "lucide-react";
+import DeleteProjectButton from "./delete-project-button";
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   ACCEPTING: { label: "Đang nhận hồ sơ", color: "bg-green-100 text-green-800" },
@@ -67,9 +68,12 @@ export default async function AdminProjectsPage() {
                           {project.applicationEnd ? new Date(project.applicationEnd).toLocaleDateString("vi-VN") : "-"}
                         </td>
                         <td className="px-4 py-3">
-                          <Link href={`/admin/projects/${project.id}/edit`}>
-                            <Button variant="ghost" size="sm">Sửa</Button>
-                          </Link>
+                          <div className="flex items-center gap-1">
+                            <Link href={`/admin/projects/${project.id}/edit`}>
+                              <Button variant="ghost" size="sm">Sửa</Button>
+                            </Link>
+                            <DeleteProjectButton id={project.id} />
+                          </div>
                         </td>
                       </tr>
                     );

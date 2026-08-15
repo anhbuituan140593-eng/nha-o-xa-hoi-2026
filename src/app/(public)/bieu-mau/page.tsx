@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Biểu mẫu nhà ở xã hội | Nhà Ở Xã Hội 2026",
   description: "Tải biểu mẫu hồ sơ nhà ở xã hội: đơn đăng ký mua, thuê, thuê mua, xác nhận đối tượng, thu nhập.",

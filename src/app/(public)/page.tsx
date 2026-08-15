@@ -15,6 +15,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 const statusLabels: Record<string, { label: string; color: string }> = {
   ACCEPTING: { label: "Đang nhận hồ sơ", color: "bg-green-100 text-green-800" },
   UPCOMING: { label: "Sắp nhận", color: "bg-yellow-100 text-yellow-800" },

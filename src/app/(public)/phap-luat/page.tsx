@@ -3,6 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Văn bản pháp luật về nhà ở xã hội | Nhà Ở Xã Hội 2026",
   description: "Tổng hợp văn bản pháp luật về nhà ở xã hội: Luật Nhà ở, Nghị định, Thông tư.",

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createForm } from "../actions";
-import FormFields from "./form-fields";
+import FormFields from "../form-fields";
 
 export default async function NewFormPage() {
   const documents = await prisma.legalDocument.findMany({ orderBy: { documentNumber: "asc" } });

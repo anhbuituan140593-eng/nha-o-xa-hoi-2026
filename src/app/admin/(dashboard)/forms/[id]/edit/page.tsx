@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { updateForm } from "../actions";
-import FormFields from "../form-fields";
+import { updateForm } from "../../actions";
+import FormFields from "../../form-fields";
 
 export default async function EditFormPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

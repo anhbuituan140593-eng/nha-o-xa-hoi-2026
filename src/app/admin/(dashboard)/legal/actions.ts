@@ -19,8 +19,8 @@ export async function createLegalDocument(formData: FormData) {
     throw new Error("Thiếu thông tin bắt buộc");
   }
 
-  const issuedDate = formData.get("issuedDate") ? new Date(formData.get("issuedDate") as string) : null;
-  const effectiveDate = formData.get("effectiveDate") ? new Date(formData.get("effectiveDate") as string) : null;
+  const issuedDate = formData.get("issuedDate") ? new Date(formData.get("issuedDate") as string) : new Date();
+  const effectiveDate = formData.get("effectiveDate") ? new Date(formData.get("effectiveDate") as string) : new Date();
   const expiryDate = formData.get("expiryDate") ? new Date(formData.get("expiryDate") as string) : null;
   const summary = (formData.get("summary") as string) || null;
   const officialUrl = (formData.get("officialUrl") as string) || null;
@@ -34,8 +34,8 @@ export async function createLegalDocument(formData: FormData) {
       title,
       documentType: documentType as any,
       issuingAuthority,
-      ...(issuedDate && { issuedDate }),
-      ...(effectiveDate && { effectiveDate }),
+      issuedDate,
+      effectiveDate,
       ...(expiryDate && { expiryDate }),
       ...(summary && { summary }),
       ...(officialUrl && { officialUrl }),
@@ -68,8 +68,8 @@ export async function updateLegalDocument(id: string, formData: FormData) {
       title: formData.get("title") as string,
       documentType: (formData.get("documentType") as string) as any,
       issuingAuthority: formData.get("issuingAuthority") as string,
-      ...(issuedDate && { issuedDate }),
-      ...(effectiveDate && { effectiveDate }),
+      ...(issuedDate !== undefined && { issuedDate }),
+      ...(effectiveDate !== undefined && { effectiveDate }),
       expiryDate: expiryDate || undefined,
       summary: summary || undefined,
       officialUrl: officialUrl || undefined,

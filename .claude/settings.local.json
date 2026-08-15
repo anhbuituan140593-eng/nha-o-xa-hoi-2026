@@ -35,7 +35,22 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/kkiem-tra)",
       "Bash(gh auth *)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m 'feat: Nhà Ở Xã Hội 2026 LegalTech website - Initial commit *)",
+      "Bash(git config *)",
+      "Bash(where winget *)",
+      "Bash(where choco *)",
+      "Bash(where scoop *)",
+      "Read(//c/Program Files/GitHub CLI/**)",
+      "Read(//c/Program Files \\\\\\(x86\\\\\\)/GitHub CLI/**)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth login --with-token)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" repo create nha-o-xa-hoi-2026 --public --source=. --remote=origin --push)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth setup-git)",
+      "Bash(git push *)",
+      "Bash(git commit -m 'fix: resolve Vercel build errors \\(imports, types, Decimal\\) *)"
     ]
   }
 }

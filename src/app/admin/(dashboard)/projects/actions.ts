@@ -63,7 +63,7 @@ export async function createProject(formData: FormData) {
   });
 
   // Xử lý ảnh dự án từ hidden inputs (imageUrl_0, imageCaption_0, ...)
-  const images: { url: string; caption?: string }[] = [];
+  const images: { url: string; caption?: string | null }[] = [];
   for (let i = 0; i < 50; i++) {
     const url = formData.get(`imageUrl_${i}`) as string;
     if (!url?.trim()) break;
@@ -124,7 +124,7 @@ export async function updateProject(id: string, formData: FormData) {
 
   // Update images: delete old and re-create from form
   await prisma.projectImage.deleteMany({ where: { projectId: id } });
-  const images: { url: string; caption?: string }[] = [];
+  const images: { url: string; caption?: string | null }[] = [];
   for (let i = 0; i < 50; i++) {
     const url = formData.get(`imageUrl_${i}`) as string;
     if (!url?.trim()) break;

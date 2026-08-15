@@ -14,7 +14,7 @@ interface ProjectData {
   totalUnits?: number | null;
   areaRange?: string | null;
   priceRange?: string | null;
-  pricePerSqm?: number | null;
+  pricePerSqm?: number | null | { toNumber: () => number };
   applicationStart?: Date | null;
   applicationEnd?: Date | null;
   lotteryDate?: Date | null;
@@ -89,7 +89,7 @@ export default function ProjectEditForm({ project, provinces }: { project: Proje
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium">Giá/m² (VNĐ)</label>
-            <input type="number" name="pricePerSqm" min={0} step={100000} defaultValue={project.pricePerSqm || ""} className="w-full rounded border px-3 py-2 text-sm focus:border-navy-600 focus:outline-none focus:ring-1 focus:ring-navy-600" />
+            <input type="number" name="pricePerSqm" min={0} step={100000} defaultValue={project.pricePerSqm ? (typeof project.pricePerSqm === "number" ? project.pricePerSqm : project.pricePerSqm.toNumber()) : ""} className="w-full rounded border px-3 py-2 text-sm focus:border-navy-600 focus:outline-none focus:ring-1 focus:ring-navy-600" />
           </div>
         </div>
       </div>

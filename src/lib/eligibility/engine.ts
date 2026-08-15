@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/db";
-import type { LegalRule, RuleCategory, RuleOperator } from "@prisma/client";
+import type { LegalRule, RuleCategory, RuleOperator, LegalDocument } from "@prisma/client";
+
+type LegalRuleWithDoc = LegalRule & { legalDocument: LegalDocument | null };
 
 export interface RuleQuery {
   applicantType?: string;
@@ -49,7 +51,7 @@ export interface AppliedRule {
   actualValue?: number;
 }
 
-export async function getApplicableRules(query: RuleQuery): Promise<LegalRule[]> {
+export async function getApplicableRules(query: RuleQuery): Promise<LegalRuleWithDoc[]> {
   const checkDate = query.checkDate ?? new Date();
 
   const where: Record<string, unknown> = {
@@ -87,7 +89,7 @@ export async function getApplicableRules(query: RuleQuery): Promise<LegalRule[]>
 }
 
 export function evaluateEligibility(
-  rules: LegalRule[],
+  rules: LegalRuleWithDoc[],
   data: ApplicantData
 ): EligibilityEvaluation {
   const details: EvaluationDetail[] = [];
@@ -269,7 +271,7 @@ export function evaluateEligibility(
   return { result, details, rulesApplied: appliedRules, score };
 }
 
-function findApplicableIncomeRule(rules: LegalRule[], data: ApplicantData): LegalRule | null {
+function findApplicableIncomeRule(rules: LegalRuleWithDoc[], data: ApplicantData): LegalRuleWithDoc | null {
   // Priority: rules matching marital status first, then generic rules
   // In our DB, some income rules use applicantType field to store marital status values
   const sorted = [...rules].sort((a, b) => {

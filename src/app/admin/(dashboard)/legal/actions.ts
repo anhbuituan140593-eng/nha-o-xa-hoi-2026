@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -45,6 +46,8 @@ export async function createLegalDocument(formData: FormData) {
     },
   });
 
+  revalidatePath("/admin/legal");
+  revalidatePath("/phap-luat");
   redirect("/admin/legal?created=1");
 }
 
@@ -79,6 +82,8 @@ export async function updateLegalDocument(id: string, formData: FormData) {
     },
   });
 
+  revalidatePath("/admin/legal");
+  revalidatePath("/phap-luat");
   redirect("/admin/legal?updated=1");
 }
 
@@ -88,5 +93,7 @@ export async function deleteLegalDocument(id: string) {
     throw new Error("Không có quyền");
   }
   await prisma.legalDocument.delete({ where: { id } });
+  revalidatePath("/admin/legal");
+  revalidatePath("/phap-luat");
   redirect("/admin/legal?deleted=1");
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { generateSlug } from "@/lib/utils";
@@ -82,6 +83,9 @@ export async function createProject(formData: FormData) {
     });
   }
 
+  revalidatePath("/admin/projects");
+  revalidatePath("/du-an");
+  revalidatePath("/", "layout");
   redirect("/admin/projects");
 }
 
@@ -142,6 +146,9 @@ export async function updateProject(id: string, formData: FormData) {
     });
   }
 
+  revalidatePath("/admin/projects");
+  revalidatePath("/du-an");
+  revalidatePath("/", "layout");
   redirect("/admin/projects");
 }
 
@@ -163,6 +170,10 @@ export async function addProjectImages(projectId: string, images: { url: string;
   if (data.length > 0) {
     await prisma.projectImage.createMany({ data });
   }
+
+  revalidatePath("/admin/projects");
+  revalidatePath("/du-an");
+  revalidatePath("/", "layout");
 }
 
 export async function deleteProjectImage(imageId: string) {
@@ -172,4 +183,8 @@ export async function deleteProjectImage(imageId: string) {
   }
 
   await prisma.projectImage.delete({ where: { id: imageId } });
+
+  revalidatePath("/admin/projects");
+  revalidatePath("/du-an");
+  revalidatePath("/", "layout");
 }

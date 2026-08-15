@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -39,6 +40,8 @@ export async function createForm(formData: FormData) {
     },
   });
 
+  revalidatePath("/admin/forms");
+  revalidatePath("/bieu-mau");
   redirect("/admin/forms?created=1");
 }
 
@@ -69,6 +72,8 @@ export async function updateForm(id: string, formData: FormData) {
     },
   });
 
+  revalidatePath("/admin/forms");
+  revalidatePath("/bieu-mau");
   redirect("/admin/forms?updated=1");
 }
 
@@ -78,5 +83,7 @@ export async function deleteForm(id: string) {
     throw new Error("Không có quyền");
   }
   await prisma.applicationForm.delete({ where: { id } });
+  revalidatePath("/admin/forms");
+  revalidatePath("/bieu-mau");
   redirect("/admin/forms?deleted=1");
 }

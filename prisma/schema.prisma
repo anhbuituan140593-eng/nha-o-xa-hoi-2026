@@ -1,0 +1,707 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USERS & AUTH
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  hashedPassword String?
+  role          UserRole  @default(CONSULTANT)
+  phone         String?
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  leads         Lead[]          @relation("LeadConsultant")
+  appointments  Appointment[]   @relation("AppointmentStaff")
+  clientCases   ClientCase[]    @relation("CaseConsultant")
+  caseReviews   ClientCase[]    @relation("CaseReviewer")
+  reviews       DocumentReview[] @relation("ReviewReviewer")
+  adminLogs     AdminLog[]
+  verifiedDocs  LegalDocument[] @relation("DocVerifier")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  CONSULTANT
+  REVIEWER
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================
+// PROVINCES
+// ============================================
+
+model Province {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  region    String?
+  projects  Project[]
+  leads     Lead[]
+  legalRules LegalRule[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// LEGAL DOCUMENTS & RULES
+// ============================================
+
+model LegalDocument {
+  id               String   @id @default(cuid())
+  documentNumber   String
+  title            String
+  documentType     LegalDocType
+  issuingAuthority String
+  issuedDate       DateTime
+  effectiveDate    DateTime
+  expiryDate       DateTime?
+  summary          String?  @db.Text
+  officialUrl      String?
+  pdfUrl           String?
+  status           DocStatus @default(ACTIVE)
+  version          Int      @default(1)
+  verifiedAt       DateTime?
+  verifiedById     String?
+  verifiedBy       User?    @relation("DocVerifier", fields: [verifiedById], references: [id])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  legalRules    LegalRule[]
+  applicationForms ApplicationForm[]
+
+  @@unique([documentNumber])
+  @@index([status])
+}
+
+enum LegalDocType {
+  LAW
+  DECREE
+  RESOLUTION
+  CIRCULAR
+  DECISION
+  OTHER
+}
+
+enum DocStatus {
+  ACTIVE
+  EXPIRED
+  AMENDED
+  DRAFT
+}
+
+model LegalRule {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  name            String
+  category        RuleCategory
+  applicantType   String?
+  operator        RuleOperator
+  value           Decimal  @db.Decimal(15, 2)
+  unit            String   @default("VND")
+  provinceId      String?
+  province        Province? @relation(fields: [provinceId], references: [id])
+  legalDocumentId String?
+  legalDocument   LegalDocument? @relation(fields: [legalDocumentId], references: [id])
+  article         String?
+  clause          String?
+  effectiveFrom   DateTime @default(now())
+  effectiveTo     DateTime?
+  active          Boolean  @default(true)
+  priority        Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  documentReviews DocumentReview[]
+
+  @@index([category])
+  @@index([applicantType])
+  @@index([active])
+}
+
+enum RuleCategory {
+  INCOME_LIMIT
+  HOUSING_CONDITION
+  APPLICANT_TYPE
+  MARRIAGE_STATUS
+  EMPLOYMENT
+  AREA_REQUIREMENT
+  OTHER
+}
+
+enum RuleOperator {
+  LTE
+  GTE
+  LT
+  GT
+  EQ
+  NEQ
+  IN
+  NOT_IN
+}
+
+// ============================================
+// PROJECTS
+// ============================================
+
+model Project {
+  id                  String   @id @default(cuid())
+  name                String
+  slug                String   @unique
+  investor            String
+  provinceId          String
+  province            Province @relation(fields: [provinceId], references: [id])
+  district            String?
+  address             String
+  latitude            Decimal? @db.Decimal(10, 7)
+  longitude           Decimal? @db.Decimal(10, 7)
+  totalUnits          Int?
+  areaRange           String?
+  priceRange          String?
+  pricePerSqm         Decimal? @db.Decimal(15, 2)
+  applicationStart    DateTime?
+  applicationEnd      DateTime?
+  lotteryDate         DateTime?
+  handoverDate        DateTime?
+  submissionAddress   String?
+  hotline             String?
+  website             String?
+  officialSourceUrl   String?
+  thumbnailUrl        String?
+  description         String?  @db.Text
+  progress            String?
+  status              ProjectStatus @default(UPCOMING)
+  statusOverride      Boolean @default(false)
+  isDemo              Boolean @default(false)
+  lastVerifiedAt      DateTime?
+  verifiedBy          String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  images          ProjectImage[]
+  documents       ProjectDocument[]
+  requirements    ProjectRequirement[]
+  leads           Lead[]
+  appointments    Appointment[]
+  clientCases     ClientCase[]
+
+  @@index([slug])
+  @@index([provinceId])
+  @@index([status])
+}
+
+enum ProjectStatus {
+  UPCOMING
+  ACCEPTING
+  CLOSED
+  UNDER_CONSTRUCTION
+  COMPLETED
+  NOT_ANNOUNCED
+}
+
+model ProjectImage {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  url       String
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model ProjectDocument {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name      String
+  url       String
+  docType   String?
+  createdAt DateTime @default(now())
+
+  @@index([projectId])
+}
+
+model ProjectRequirement {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requirement String
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+}
+
+// ============================================
+// APPLICATION FORMS
+// ============================================
+
+model ApplicationForm {
+  id              String   @id @default(cuid())
+  name            String
+  code            String   @unique
+  description     String?  @db.Text
+  applicantType   String?
+  legalDocumentId String?
+  legalDocument   LegalDocument? @relation(fields: [legalDocumentId], references: [id])
+  fileUrl         String
+  effectiveFrom   DateTime @default(now())
+  effectiveTo     DateTime?
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([code])
+}
+
+// ============================================
+// SERVICE PACKAGES
+// ============================================
+
+model ServicePackage {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  type            ServiceType
+  description     String?  @db.Text
+  features        Json?
+  displayPrice    String?
+  priceText       String?
+  showPrice       Boolean  @default(false)
+  durationText    String?
+  numberOfReviews Int      @default(0)
+  active          Boolean  @default(true)
+  featured        Boolean  @default(false)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  appointments Appointment[]
+  clientCases  ClientCase[]
+
+  @@index([slug])
+}
+
+enum ServiceType {
+  FULL_PACKAGE
+  REVIEW
+  CONSULTATION
+  OTHER
+}
+
+// ============================================
+// LEADS (CRM)
+// ============================================
+
+model Lead {
+  id              String   @id @default(cuid())
+  leadCode        String   @unique
+  fullName        String
+  phone           String
+  zalo            String?
+  email           String?
+  provinceId      String?
+  province        Province? @relation(fields: [provinceId], references: [id])
+  projectId       String?
+  project         Project? @relation(fields: [projectId], references: [id])
+  serviceInterest String?
+  source          LeadSource @default(DIRECT)
+  consultantId    String?
+  consultant      User?    @relation("LeadConsultant", fields: [consultantId], references: [id])
+  status          LeadStatus @default(NEW)
+  eligibilityCheckId String?
+  eligibilityCheck EligibilityCheck? @relation(fields: [eligibilityCheckId], references: [id])
+  documentStatus  String?
+  note            String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  activities    LeadActivity[]
+  appointments  Appointment[]
+  clientCases   ClientCase[]
+
+  @@index([leadCode])
+  @@index([phone])
+  @@index([status])
+  @@index([source])
+}
+
+enum LeadSource {
+  HOME
+  ELIGIBILITY
+  PROJECT
+  SERVICE
+  DOCUMENTS
+  FORMS
+  GOOGLE
+  FACEBOOK
+  ZALO
+  DIRECT
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  APPOINTMENT_REQUESTED
+  APPOINTMENT_CONFIRMED
+  CONSULTED
+  SERVICE_ACCEPTED
+  WAITING_DOCUMENTS
+  REVIEWING
+  NEED_MORE_DOCUMENTS
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+model LeadActivity {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  type      ActivityType
+  content   String   @db.Text
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+}
+
+enum ActivityType {
+  NOTE
+  CALL
+  EMAIL
+  MEETING
+  STATUS_CHANGE
+  DOCUMENT_UPDATE
+  OTHER
+}
+
+// ============================================
+// APPOINTMENTS
+// ============================================
+
+model Appointment {
+  id              String   @id @default(cuid())
+  appointmentCode String   @unique
+  leadId          String?
+  lead            Lead?    @relation(fields: [leadId], references: [id])
+  staffId         String?
+  staff           User?    @relation("AppointmentStaff", fields: [staffId], references: [id])
+  serviceId       String?
+  service         ServicePackage? @relation(fields: [serviceId], references: [id])
+  projectId       String?
+  project         Project? @relation(fields: [projectId], references: [id])
+  officeLocationId String?
+  officeLocation  OfficeLocation? @relation(fields: [officeLocationId], references: [id])
+  preferredDate   DateTime
+  preferredTime   String
+  confirmedDate   DateTime?
+  confirmedTime   String?
+  location        String?
+  status          AppointmentStatus @default(REQUESTED)
+  customerNote    String?  @db.Text
+  internalNote    String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([appointmentCode])
+  @@index([leadId])
+  @@index([staffId])
+  @@index([status])
+  @@index([preferredDate])
+}
+
+enum AppointmentStatus {
+  REQUESTED
+  CONFIRMED
+  RESCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model OfficeLocation {
+  id            String   @id @default(cuid())
+  name          String
+  address       String
+  province      String
+  district      String?
+  hotline       String?
+  googleMapsUrl String?
+  openingHours  String?
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  appointments Appointment[]
+}
+
+// ============================================
+// CLIENT CASES
+// ============================================
+
+model ClientCase {
+  id                    String   @id @default(cuid())
+  caseCode              String   @unique
+  leadId                String
+  lead                  Lead     @relation(fields: [leadId], references: [id])
+  projectId             String?
+  project               Project? @relation(fields: [projectId], references: [id])
+  servicePackageId      String?
+  servicePackage        ServicePackage? @relation(fields: [servicePackageId], references: [id])
+  assignedConsultantId  String?
+  assignedConsultant    User?    @relation("CaseConsultant", fields: [assignedConsultantId], references: [id])
+  assignedReviewerId    String?
+  assignedReviewer      User?    @relation("CaseReviewer", fields: [assignedReviewerId], references: [id])
+  eligibilityCheckId    String?
+  eligibilityCheck      EligibilityCheck? @relation(fields: [eligibilityCheckId], references: [id])
+  status                CaseStatus @default(NEW)
+  serviceAgreed         Boolean  @default(false)
+  serviceFeeNote        String?  @db.Text
+  paymentMethodNote     String?
+  paymentStatusInternal String?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  documents       ClientDocument[]
+
+  @@index([caseCode])
+  @@index([leadId])
+  @@index([status])
+}
+
+enum CaseStatus {
+  NEW
+  WAITING_DOCUMENTS
+  DOCUMENTS_RECEIVED
+  REVIEWING
+  NEEDS_MORE
+  READY_TO_SUBMIT
+  COMPLETED
+  CANCELLED
+}
+
+model ClientDocument {
+  id        String   @id @default(cuid())
+  caseId    String
+  clientCase ClientCase @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  fileName  String
+  fileUrl   String
+  fileType  String
+  category  DocCategory
+  fileSize  Int?
+  uploadedBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reviews DocumentReview[]
+
+  @@index([caseId])
+}
+
+enum DocCategory {
+  CCCD
+  MARRIAGE
+  INCOME
+  HOUSING
+  APPLICANT_TYPE
+  APPLICATION_FORM
+  PROJECT_DOC
+  OTHER
+}
+
+model DocumentReview {
+  id            String   @id @default(cuid())
+  documentId    String
+  document      ClientDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  reviewerId    String?
+  reviewer      User?    @relation("ReviewReviewer", fields: [reviewerId], references: [id])
+  status        ReviewStatus
+  note          String?  @db.Text
+  legalRuleId   String?
+  legalRule     LegalRule? @relation(fields: [legalRuleId], references: [id])
+  reviewedAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([documentId])
+}
+
+enum ReviewStatus {
+  OK
+  NEEDS_CHECK
+  MISSING
+  NEEDS_REPLACEMENT
+}
+
+// ============================================
+// ELIGIBILITY CHECKS
+// ============================================
+
+model EligibilityCheck {
+  id           String   @id @default(cuid())
+  checkCode    String   @unique
+  applicantType String
+  maritalStatus String
+  province     String?
+  incomeSelf   Decimal? @db.Decimal(15, 2)
+  incomeSpouse Decimal? @db.Decimal(15, 2)
+  householdIncome Decimal? @db.Decimal(15, 2)
+  housingStatus String?
+  employmentType String?
+  childrenCount Int     @default(0)
+  result       EligibilityResult
+  score        Int?
+  rulesApplied Json?
+  checklist    Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  answers      EligibilityAnswer[]
+  generatedChecklists GeneratedChecklist[]
+  leads        Lead[]
+  clientCases  ClientCase[]
+
+  @@index([checkCode])
+}
+
+enum EligibilityResult {
+  ELIGIBLE
+  LIKELY_ELIGIBLE
+  NEED_VERIFICATION
+  NOT_ELIGIBLE
+  INSUFFICIENT_DATA
+}
+
+model EligibilityAnswer {
+  id              String   @id @default(cuid())
+  eligibilityCheckId String
+  eligibilityCheck EligibilityCheck @relation(fields: [eligibilityCheckId], references: [id], onDelete: Cascade)
+  questionCode    String
+  answer          String
+  detail          String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  @@index([eligibilityCheckId])
+}
+
+model GeneratedChecklist {
+  id              String   @id @default(cuid())
+  eligibilityCheckId String
+  eligibilityCheck EligibilityCheck @relation(fields: [eligibilityCheckId], references: [id], onDelete: Cascade)
+  itemName        String
+  itemCategory    String
+  required        Boolean  @default(true)
+  description     String?  @db.Text
+  formCode        String?
+  status          ChecklistItemStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+
+  @@index([eligibilityCheckId])
+}
+
+enum ChecklistItemStatus {
+  PENDING
+  PREPARED
+  VERIFIED
+  MISSING
+}
+
+// ============================================
+// CONTACT SETTINGS
+// ============================================
+
+model ContactSetting {
+  id              String   @id @default(cuid())
+  hotline         String?
+  zaloPhone       String?
+  zaloUrl         String?
+  messengerUrl    String?
+  facebookUrl     String?
+  email           String?
+  officeAddress   String?
+  googleMapsUrl   String?
+  workingHours    String?
+  consultationNote String? @db.Text
+  siteName        String   @default("Nhà Ở Xã Hội 2026")
+  logoUrl         String?
+  faviconUrl      String?
+  disclaimerLegal String?  @db.Text
+  disclaimerService String? @db.Text
+  updatedAt       DateTime @updatedAt
+}
+
+// ============================================
+// ADMIN LOGS
+// ============================================
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  admin     User     @relation(fields: [adminId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  oldValue  Json?
+  newValue  Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([entity])
+  @@index([createdAt])
+}

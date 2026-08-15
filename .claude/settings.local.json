@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(winget install *)",
+      "Bash(\"/c/Program Files/PostgreSQL/17/bin/psql.exe\" --version)",
+      "Bash(\"/c/Program Files/PostgreSQL/16/bin/psql.exe\" --version)",
+      "Bash(winget search *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin/login)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/kiem-tra)",
+      "Bash(curl -s -L -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin/login)",
+      "Bash(curl -s -I http://localhost:3000/admin/login)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n%{redirect_url}\" http://localhost:3000/admin/login)",
+      "Bash(cp -r leads \"\\(dashboard\\)/leads\")",
+      "Bash(rm -rf leads)",
+      "Bash(mkdir -p login)",
+      "Bash(cp \"\\(auth\\)/login/page.tsx\" \"login/page.tsx\")",
+      "Bash(rm -rf \"\\(auth\\)\")",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 1460)",
+      "Bash(taskkill //F //PID 2664)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} /           \\\\n\" http://localhost:3000)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} /kiem-tra    \\\\n\" http://localhost:3000/kiem-tra)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} /du-an       \\\\n\" http://localhost:3000/du-an)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} /dich-vu     \\\\n\" http://localhost:3000/dich-vu)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code} /dat-lich    \\\\n\" http://localhost:3000/dat-lich)",
+      "Bash(curl -s -X POST http://localhost:3000/api/eligibility/check -H 'Content-Type: application/json' -d '{\"applicantType\":\"CONG_CHUC\",\"maritalStatus\":\"SINGLE\",\"housingStatus\":\"NO\",\"incomeSelf\":15000000,\"incomeSpouse\":0,\"childrenCount\":0,\"employmentType\":\"CONTRACT\"}')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:3000/ket-qua/KQ-MSUB35DR-80ZY\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -L http://localhost:3000/admin/projects/new)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin/projects/new)",
+      "Bash(curl -s http://localhost:3000/admin/projects/new)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/admin/settings)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/kkiem-tra)",
+      "Bash(gh auth *)",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ]
+  }
+}

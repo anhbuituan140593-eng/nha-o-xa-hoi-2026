@@ -32,17 +32,17 @@ export function Header({ contact }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <div className="container mx-auto flex h-14 md:h-16 items-center justify-between px-3 md:px-4">
+      <div className="container mx-auto flex h-16 md:h-20 items-center justify-between px-3 md:px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0" onClick={() => setMobileMenuOpen(false)}>
+        <Link href="/" className="flex items-center gap-3 shrink-0" onClick={() => setMobileMenuOpen(false)}>
           {contact?.logoUrl ? (
-            <img src={contact.logoUrl} alt={contact.siteName || "Logo"} className="h-7 w-7 md:h-8 md:w-8 object-contain" />
+            <img src={contact.logoUrl} alt={contact.siteName || "Logo"} className="h-10 w-10 md:h-12 md:w-12 object-contain" />
           ) : (
-            <div className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-lg bg-navy-800 text-xs md:text-sm font-bold text-white">
+            <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-lg bg-navy-800 text-sm md:text-base font-bold text-white">
               N
             </div>
           )}
-          <span className="text-base md:text-lg font-bold text-navy-900 leading-tight">
+          <span className="text-lg md:text-xl font-bold text-navy-900 leading-tight">
             {contact?.siteName || "Nhà Ở Xã Hội 2026"}
           </span>
         </Link>

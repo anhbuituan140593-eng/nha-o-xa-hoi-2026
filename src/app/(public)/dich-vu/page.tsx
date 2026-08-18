@@ -87,16 +87,16 @@ export default function ServicesPage() {
 
       {/* Process Note */}
       <div className="mx-auto mt-12 max-w-2xl text-center">
-        <Card className="bg-gray-50">
+        <Card className="bg-navy-50 border-navy-200">
           <CardContent className="pt-6">
             <Users className="mx-auto mb-4 h-8 w-8 text-navy-600" />
-            <h3 className="mb-2 font-semibold">Quy trình dịch vụ</h3>
+            <h3 className="mb-2 font-semibold">Quy trình dịch vụ — Miễn phí tư vấn</h3>
             <p className="text-sm text-muted-foreground">
               Khách gửi yêu cầu → Nhân viên gọi điện → Hẹn lịch gặp → Gặp trực tiếp →
               Tư vấn → Thống nhất dịch vụ → Hoàn thiện hồ sơ
             </p>
-            <p className="mt-4 text-xs text-muted-foreground italic">
-              * Thanh toán được thực hiện trực tiếp sau khi hai bên thống nhất, không qua website.
+            <p className="mt-3 inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+              Miễn phí tư vấn ban đầu — Không thu phí qua website
             </p>
           </CardContent>
         </Card>

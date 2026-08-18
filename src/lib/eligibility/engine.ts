@@ -54,28 +54,30 @@ export interface AppliedRule {
 export async function getApplicableRules(query: RuleQuery): Promise<LegalRuleWithDoc[]> {
   const checkDate = query.checkDate ?? new Date();
 
+  // Chỉ lọc theo ngày hiệu lực + tỉnh, KHÔNG lọc applicantType ở DB
+  // để không làm mất các rule thu nhập theo maritalStatus (MARRIED, SINGLE_WITH_CHILD)
   const where: Record<string, unknown> = {
     active: true,
     effectiveFrom: { lte: checkDate },
-    OR: [
-      { effectiveTo: null },
-      { effectiveTo: { gte: checkDate } },
+    AND: [
+      {
+        OR: [
+          { effectiveTo: null },
+          { effectiveTo: { gte: checkDate } },
+        ],
+      },
     ],
   };
 
-  if (query.applicantType) {
-    where.OR = [
-      { applicantType: query.applicantType },
-      { applicantType: null },
-    ];
-  }
-
+  // Lọc theo tỉnh nếu có — giữ điều kiện ngày ở AND nên không bị ghi đè
   if (query.province) {
-    where.OR = [
-      ...(Array.isArray(where.OR) ? where.OR : []),
-      { province: { code: query.province } },
-      { provinceId: null },
-    ];
+    const andArr = where.AND as unknown[];
+    andArr.push({
+      OR: [
+        { province: { code: query.province } },
+        { provinceId: null },
+      ],
+    });
   }
 
   return prisma.legalRule.findMany({

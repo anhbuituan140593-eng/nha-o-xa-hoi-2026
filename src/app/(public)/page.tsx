@@ -41,7 +41,7 @@ export default async function HomePage() {
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl lg:text-5xl">
               Kiểm tra điều kiện mua{" "}
-              <span className="text-blue-300">Nhà ở xã hội 2026</span>
+              <span className="text-blue-300">Nhà ở xã hội</span>
             </h1>
             <p className="mt-3 text-base text-navy-200 sm:text-lg md:mt-4 md:text-xl">
               Kiểm tra điều kiện, hồ sơ và dự án phù hợp theo quy định pháp luật hiện hành.

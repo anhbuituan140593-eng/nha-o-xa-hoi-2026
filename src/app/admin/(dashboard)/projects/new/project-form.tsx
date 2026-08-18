@@ -134,6 +134,17 @@ export default function ProjectForm({ provinces }: { provinces: Province[] }) {
         </div>
       </div>
 
+      {/* Toàn cảnh 360° — tách riêng cho dễ thấy */}
+      <div className="border-t pt-5">
+        <h3 className="mb-1 text-sm font-semibold text-gray-700">Toàn cảnh 360°</h3>
+        <p className="mb-3 text-xs text-muted-foreground">Dán link 360° để hiển thị iframe trong trang chi tiết dự án. Ví dụ: https://360.vhggroup.vn/phucdat-hatinh/</p>
+        <div className="rounded-lg border-2 border-dashed border-amber-300 bg-amber-50 p-4">
+          <label className="mb-1 block text-sm font-medium">Link toàn cảnh 360°</label>
+          <input name="panoramaUrl" type="url" className="w-full rounded border bg-white px-3 py-2 text-sm focus:border-navy-600 focus:outline-none focus:ring-1 focus:ring-navy-600" placeholder="https://360.vhggroup.vn/phucdat-hatinh/" />
+          <p className="mt-1 text-xs text-muted-foreground">Để trống nếu dự án chưa có. Với dự án “Phúc Đạt Hà Tĩnh” sẽ tự dùng link trên nếu bỏ trống.</p>
+        </div>
+      </div>
+
       {/* Trạng thái & Mô tả */}
       <div className="border-t pt-5">
         <div className="grid gap-4 sm:grid-cols-2">

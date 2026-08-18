@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
+import { PanoramaViewer } from "@/components/panorama-viewer";
 
 export default async function ProjectDetailPage({
   params,
@@ -67,6 +68,21 @@ export default async function ProjectDetailPage({
           ))}
         </div>
       )}
+
+      {/* Panorama 360 */}
+      {(() => {
+        // Hiển thị 360 nếu dự án có panoramaUrl, hoặc fallback cho Phúc Đạt Hà Tĩnh
+        const panoramaUrl =
+          (project as unknown as { panoramaUrl?: string | null }).panoramaUrl ||
+          (project.slug.includes("phuc-dat") || project.name.toLowerCase().includes("phúc đạt") || project.name.toLowerCase().includes("phuc dat")
+            ? "https://360.vhggroup.vn/phucdat-hatinh/"
+            : null);
+        return panoramaUrl ? (
+          <div className="mb-6 sm:mb-8">
+            <PanoramaViewer url={panoramaUrl} title={`Toàn cảnh 360° - ${project.name}`} />
+          </div>
+        ) : null;
+      })()}
 
       {/* Info Grid */}
       <div className="mb-6 grid gap-4 sm:mb-8 sm:gap-6 md:grid-cols-2">

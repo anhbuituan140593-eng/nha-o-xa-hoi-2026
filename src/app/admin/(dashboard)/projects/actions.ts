@@ -30,6 +30,7 @@ export async function createProject(formData: FormData) {
   const website = (formData.get("website") as string) || null;
   const officialSourceUrl = (formData.get("officialSourceUrl") as string) || null;
   const thumbnailUrl = (formData.get("thumbnailUrl") as string) || null;
+  const panoramaUrl = (formData.get("panoramaUrl") as string) || null;
   const description = (formData.get("description") as string) || null;
   const progress = (formData.get("progress") as string) || null;
   const status = (formData.get("status") as string) || "UPCOMING";
@@ -57,6 +58,7 @@ export async function createProject(formData: FormData) {
       website,
       officialSourceUrl,
       thumbnailUrl,
+      panoramaUrl,
       description,
       progress,
       status: status as any,
@@ -120,6 +122,7 @@ export async function updateProject(id: string, formData: FormData) {
       website: (formData.get("website") as string) || null,
       officialSourceUrl: (formData.get("officialSourceUrl") as string) || null,
       thumbnailUrl: (formData.get("thumbnailUrl") as string) || null,
+      panoramaUrl: (formData.get("panoramaUrl") as string) || null,
       description: (formData.get("description") as string) || null,
       progress: (formData.get("progress") as string) || null,
       status: (formData.get("status") as string) as any,

@@ -218,6 +218,7 @@ model Project {
   website             String?
   officialSourceUrl   String?
   thumbnailUrl        String?
+  panoramaUrl         String?
   description         String?  @db.Text
   progress            String?
   status              ProjectStatus @default(UPCOMING)

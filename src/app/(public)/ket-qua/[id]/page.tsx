@@ -23,29 +23,34 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
 
   const resultConfig = {
     ELIGIBLE: {
-      label: "CÓ KHẢ NĂNG ĐỦ ĐIỀU KIỆN",
+      label: "ĐỦ ĐIỀU KIỆN MUA NOXH",
+      desc: "Bạn đáp ứng các điều kiện cơ bản để mua nhà ở xã hội theo quy định hiện hành.",
       color: "bg-green-100 text-green-800 border-green-200",
       icon: CheckCircle,
     },
     LIKELY_ELIGIBLE: {
-      label: "CÓ KHẢ NĂNG ĐÁP ỨNG",
-      color: "bg-blue-100 text-blue-800 border-blue-200",
+      label: "ĐỦ ĐIỀU KIỆN MUA NOXH",
+      desc: "Bạn đáp ứng các điều kiện cơ bản. Vui lòng chuẩn bị hồ sơ để nộp cho cơ quan có thẩm quyền xét duyệt.",
+      color: "bg-green-100 text-green-800 border-green-200",
       icon: CheckCircle,
     },
     NEED_VERIFICATION: {
-      label: "CẦN XÁC MINH THÊM",
+      label: "CẦN XEM XÉT THÊM",
+      desc: "Hồ sơ của bạn cần bổ sung hoặc xác minh thêm (ví dụ: xác nhận khoảng cách nơi ở – nơi làm việc).",
       color: "bg-yellow-100 text-yellow-800 border-yellow-200",
       icon: AlertTriangle,
     },
     NOT_ELIGIBLE: {
-      label: "CHƯA ĐỦ ĐIỀU KIỆN",
+      label: "KHÔNG ĐỦ ĐIỀU KIỆN",
+      desc: "Bạn chưa đáp ứng điều kiện mua nhà ở xã hội theo quy định hiện hành.",
       color: "bg-red-100 text-red-800 border-red-200",
       icon: XCircle,
     },
     INSUFFICIENT_DATA: {
-      label: "THIẾU THÔNG TIN",
-      color: "bg-gray-100 text-gray-800 border-gray-200",
-      icon: Info,
+      label: "CẦN XEM XÉT THÊM",
+      desc: "Thiếu thông tin để đánh giá. Vui lòng bổ sung và kiểm tra lại.",
+      color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      icon: AlertTriangle,
     },
   };
 
@@ -63,7 +68,8 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           <Badge variant="outline" className={`mb-4 ${config.color}`}>
             {config.label}
           </Badge>
-          <p className="text-sm text-muted-foreground">Mã kết quả: {check.checkCode}</p>
+          <p className="mx-auto max-w-xl text-sm text-muted-foreground">{config.desc}</p>
+          <p className="mt-3 text-sm text-muted-foreground">Mã kết quả: {check.checkCode}</p>
         </CardContent>
       </Card>
 
@@ -213,9 +219,42 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
       {check.result === "NEED_VERIFICATION" && (
         <Card className="mb-6 bg-yellow-50 border-yellow-200">
           <CardContent className="pt-6 text-center">
-            <h3 className="mb-2 text-lg font-bold">Trường hợp của bạn cần kiểm tra thêm</h3>
+            <h3 className="mb-2 text-lg font-bold">Trường hợp của bạn cần xem xét thêm</h3>
             <p className="mb-6 text-sm text-muted-foreground">
-              Bạn có thể đặt lịch gặp trực tiếp để chuyên viên xem thông tin và hướng dẫn giấy tờ cần xác minh.
+              Ví dụ: có nhà nhưng cách xa nơi làm việc cần xác nhận theo quy định tỉnh/TP. Đặt lịch để chuyên viên xem thông tin và hướng dẫn giấy tờ cần xác minh.
+            </p>
+            <Button asChild>
+              <Link href="/dat-lich">HẸN CHUYÊN VIÊN</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {check.result === "NOT_ELIGIBLE" && (
+        <Card className="mb-6 bg-red-50 border-red-200">
+          <CardContent className="pt-6 text-center">
+            <h3 className="mb-2 text-lg font-bold">Bạn chưa đủ điều kiện mua NOXH</h3>
+            <p className="mb-6 text-sm text-muted-foreground">
+              Kết quả cho thấy bạn chưa đáp ứng điều kiện theo quy định hiện hành. Bạn có thể liên hệ chuyên viên để được tư vấn chi tiết về trường hợp của mình.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button asChild variant="outline">
+                <Link href="/kiem-tra">KIỂM TRA LẠI</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/dat-lich">LIÊN HỆ TƯ VẤN</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {check.result === "INSUFFICIENT_DATA" && (
+        <Card className="mb-6 bg-yellow-50 border-yellow-200">
+          <CardContent className="pt-6 text-center">
+            <h3 className="mb-2 text-lg font-bold">Cần xem xét thêm</h3>
+            <p className="mb-6 text-sm text-muted-foreground">
+              Thiếu thông tin để đánh giá đầy đủ. Vui lòng kiểm tra lại hoặc đặt lịch để được tư vấn.
             </p>
             <Button asChild>
               <Link href="/dat-lich">HẸN CHUYÊN VIÊN</Link>

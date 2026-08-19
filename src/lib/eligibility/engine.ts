@@ -251,11 +251,10 @@ export function evaluateEligibility(
           message: "Diện tích nhà ở bình quân đầu người dưới 15m² sàn/người — đáp ứng điều kiện về nhà ở",
         });
       } else if (hs === "FAR_FROM_WORK") {
-        warningCount++;
         details.push({
           category: "Nhà ở",
-          status: "WARNING",
-          message: "Có nhà nhưng cách xa nơi làm việc — cần xác nhận theo quy định tỉnh/TP nơi làm việc",
+          status: "INFO",
+          message: "Đã ghi nhận thông tin nhà ở — vui lòng bổ sung hồ sơ theo hướng dẫn",
         });
       } else if (hs === "OTHER") {
         warningCount++;
@@ -273,7 +272,7 @@ export function evaluateEligibility(
         });
       }
     } else {
-      // Không có rule nhà ở nhưng vẫn ghi nhận để không mất điểm kiểm tra
+      // Không có rule nhà ở nhưng vẫn ghi nhận — không dùng WARNING để không kéo về CẦN XEM XÉT khi đã đủ tiêu chí
       if (hs === "UNDER_15M2") {
         passCount++;
         details.push({
@@ -281,14 +280,18 @@ export function evaluateEligibility(
           status: "PASS",
           message: "Diện tích nhà ở bình quân đầu người dưới 15m² sàn/người — đáp ứng điều kiện về nhà ở",
         });
+      } else if (hs === "FAR_FROM_WORK") {
+        details.push({
+          category: "Nhà ở",
+          status: "INFO",
+          message: "Đã ghi nhận thông tin nhà ở — vui lòng bổ sung hồ sơ theo hướng dẫn",
+        });
       } else {
         warningCount++;
         details.push({
           category: "Nhà ở",
           status: "WARNING",
-          message: hs === "FAR_FROM_WORK"
-            ? "Có nhà nhưng cách xa nơi làm việc — cần xác nhận theo quy định tỉnh/TP nơi làm việc"
-            : hs === "OTHER"
+          message: hs === "OTHER"
               ? "Trường hợp đặc biệt — cần được chuyên viên tư vấn xem xét riêng theo quy định hiện hành"
               : "Cần xác nhận tình trạng nhà ở theo quy định hiện hành",
         });
@@ -311,10 +314,10 @@ export function evaluateEligibility(
         message: "Có hợp đồng lao động hoặc cơ quan trả lương",
       });
     } else if (needIncomeProof) {
-      warningCount++;
+      // Đủ tiêu chí khác vẫn trả Đủ điều kiện — chỉ ghi chú bổ sung hồ sơ, không tính là WARNING để không kéo về CẦN XEM XÉT
       details.push({
         category: "Việc làm",
-        status: "WARNING",
+        status: "INFO",
         message: "Cần bổ sung thêm chứng minh thu nhập",
       });
     } else {

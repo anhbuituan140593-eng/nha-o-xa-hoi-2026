@@ -36,7 +36,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
     },
     NEED_VERIFICATION: {
       label: "CẦN XEM XÉT THÊM",
-      desc: "Hồ sơ của bạn cần bổ sung hoặc xác minh thêm (ví dụ: xác nhận khoảng cách nơi ở – nơi làm việc).",
+      desc: "Hồ sơ của bạn cần bổ sung hoặc xác minh thêm. Vui lòng liên hệ chuyên viên để được hướng dẫn giấy tờ cần chuẩn bị.",
       color: "bg-yellow-100 text-yellow-800 border-yellow-200",
       icon: AlertTriangle,
     },
@@ -120,11 +120,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
               variant={
                 check.housingStatus === "NO_OWNERSHIP" || check.housingStatus === "UNDER_15M2"
                   ? "success"
-                  : check.housingStatus === "FAR_FROM_WORK"
-                    ? "warning"
-                    : check.housingStatus === "OTHER"
-                      ? "secondary"
-                      : "secondary"
+                  : "secondary"
               }
             >
               {check.housingStatus === "NO_OWNERSHIP"
@@ -132,7 +128,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
                 : check.housingStatus === "UNDER_15M2"
                   ? "✅ Dưới 15m²/người — đáp ứng"
                   : check.housingStatus === "FAR_FROM_WORK"
-                    ? "🟡 Cần xác nhận khoảng cách"
+                    ? "⚪ Đã ghi nhận"
                     : check.housingStatus === "OTHER"
                       ? "⚪ Trường hợp khác"
                       : "⚪ Chưa rõ"}
@@ -154,15 +150,13 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
               variant={
                 check.employmentType === "CONTRACT"
                   ? "success"
-                  : ["FREELANCE", "BUSINESS"].includes(check.employmentType || "")
-                    ? "warning"
-                    : "secondary"
+                  : "secondary"
               }
             >
               {check.employmentType === "CONTRACT"
                 ? "✅ Có hợp đồng"
-                : ["FREELANCE", "BUSINESS"].includes(check.employmentType || "")
-                  ? "🟡 Lao động tự do"
+                : ["FREELANCE", "BUSINESS", "NO", "OTHER"].includes(check.employmentType || "")
+                  ? "⚪ Đã ghi nhận — bổ sung chứng minh thu nhập theo checklist"
                   : "⚪ Chưa rõ"}
             </Badge>
           </div>
@@ -221,7 +215,7 @@ export default async function ResultPage({ params }: { params: Promise<{ id: str
           <CardContent className="pt-6 text-center">
             <h3 className="mb-2 text-lg font-bold">Trường hợp của bạn cần xem xét thêm</h3>
             <p className="mb-6 text-sm text-muted-foreground">
-              Ví dụ: có nhà nhưng cách xa nơi làm việc cần xác nhận theo quy định tỉnh/TP. Đặt lịch để chuyên viên xem thông tin và hướng dẫn giấy tờ cần xác minh.
+              Hồ sơ của bạn cần bổ sung hoặc xác minh thêm. Đặt lịch để chuyên viên xem thông tin và hướng dẫn giấy tờ cần chuẩn bị.
             </p>
             <Button asChild>
               <Link href="/dat-lich">HẸN CHUYÊN VIÊN</Link>

@@ -227,9 +227,8 @@ export default function EligibilityWizard() {
               </p>
             )}
             {data.housingStatus === "FAR_FROM_WORK" && (
-              <p className="mt-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-800">
-                Điều kiện này áp dụng theo quy định của từng tỉnh/thành phố về khoảng cách
-                giữa nơi ở và nơi làm việc.
+              <p className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-muted-foreground">
+                Vui lòng chuẩn bị hồ sơ theo checklist sau khi có kết quả kiểm tra.
               </p>
             )}
             {data.housingStatus === "OTHER" && (

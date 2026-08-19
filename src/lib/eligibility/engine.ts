@@ -51,6 +51,21 @@ export interface AppliedRule {
   actualValue?: number;
 }
 
+// Nhóm ưu tiên: mặc định đủ điều kiện và được ưu tiên mua/thuê mua NOXH
+export const PRIORITY_APPLICANT_TYPES = new Set<string>([
+  "CO_CONG",
+  "THAN_NHAN_LIET_SI",
+  "NGUOI_KHUYET_TAT",
+  "TAI_DINH_CU",
+]);
+
+const PRIORITY_LABELS: Record<string, string> = {
+  CO_CONG: "Người có công với cách mạng",
+  THAN_NHAN_LIET_SI: "Thân nhân liệt sĩ",
+  NGUOI_KHUYET_TAT: "Người khuyết tật",
+  TAI_DINH_CU: "Người được bố trí tái định cư (mua/thuê mua NOXH)",
+};
+
 export async function getApplicableRules(query: RuleQuery): Promise<LegalRuleWithDoc[]> {
   const checkDate = query.checkDate ?? new Date();
 
@@ -100,7 +115,21 @@ export function evaluateEligibility(
   let failCount = 0;
   let warningCount = 0;
 
-  // Evaluate income rules
+  // --- Nhóm ưu tiên mặc định đủ điều kiện ---
+  const priorityType = data.applicantType ? data.applicantType.toUpperCase() : "";
+  const isPriorityApplicant = PRIORITY_APPLICANT_TYPES.has(priorityType);
+
+  if (isPriorityApplicant) {
+    const label = PRIORITY_LABELS[priorityType] ?? data.applicantType;
+    passCount++;
+    details.push({
+      category: "Đối tượng ưu tiên",
+      status: "PASS",
+      message: `${label} — Mặc định đủ điều kiện và được ưu tiên mua/thuê mua nhà ở xã hội`,
+    });
+  }
+
+  // Evaluate income rules — nhóm ưu tiên không bị đánh FAIL do thu nhập vượt ngưỡng
   const incomeRules = rules.filter((r) => r.category === "INCOME_LIMIT");
   if (incomeRules.length > 0) {
     const applicableIncomeRule = findApplicableIncomeRule(incomeRules, data);
@@ -115,7 +144,7 @@ export function evaluateEligibility(
         category: "INCOME_LIMIT",
         operator: applicableIncomeRule.operator,
         value: Number(applicableIncomeRule.value),
-        passed,
+        passed: isPriorityApplicant ? true : passed,
         actualValue: householdIncome,
       });
 
@@ -125,6 +154,20 @@ export function evaluateEligibility(
           category: "Thu nhập",
           status: "PASS",
           message: `Thu nhập ${formatVND(householdIncome)} đáp ứng ngưỡng ${formatVND(Number(applicableIncomeRule.value))}`,
+          legalBasis: applicableIncomeRule.legalDocument ? {
+            documentNumber: applicableIncomeRule.legalDocument.documentNumber,
+            article: applicableIncomeRule.article ?? "",
+            clause: applicableIncomeRule.clause ?? "",
+            url: applicableIncomeRule.legalDocument.officialUrl ?? undefined,
+          } : undefined,
+        });
+      } else if (isPriorityApplicant) {
+        // Ưu tiên: vượt ngưỡng vẫn đủ điều kiện, chỉ lưu ý
+        passCount++;
+        details.push({
+          category: "Thu nhập",
+          status: "PASS",
+          message: `Thu nhập ${formatVND(householdIncome)} — thuộc nhóm ưu tiên, mặc định đủ điều kiện (vượt ngưỡng ${formatVND(Number(applicableIncomeRule.value))} vẫn được ưu tiên xét duyệt)`,
           legalBasis: applicableIncomeRule.legalDocument ? {
             documentNumber: applicableIncomeRule.legalDocument.documentNumber,
             article: applicableIncomeRule.article ?? "",
@@ -156,9 +199,17 @@ export function evaluateEligibility(
     }
   }
 
-  // Evaluate applicant type
+  // Evaluate applicant type — nhóm ưu tiên luôn PASS ở bước Đối tượng
   const typeRules = rules.filter((r) => r.category === "APPLICANT_TYPE");
-  if (typeRules.length > 0) {
+  if (isPriorityApplicant) {
+    // Đã cộng PASS ở khối Đối tượng ưu tiên phía trên, không đánh FAIL lại ở đây
+    // Vẫn ghi nhận thêm một dòng Đối tượng để đồng nhất hiển thị
+    details.push({
+      category: "Đối tượng",
+      status: "PASS",
+      message: "Thuộc đối tượng được hỗ trợ nhà ở xã hội (nhóm ưu tiên)",
+    });
+  } else if (typeRules.length > 0) {
     const typeMatch = typeRules.some((r) => r.applicantType === data.applicantType);
     if (typeMatch) {
       passCount++;
@@ -276,12 +327,28 @@ export function evaluateEligibility(
     }
   }
 
-  // Determine overall result
+  // Determine overall result — nhóm ưu tiên mặc định ELIGIBLE (không bị kéo về NOT_ELIGIBLE do thu nhập)
   const totalChecks = passCount + failCount + warningCount;
   let result: EligibilityEvaluation["result"];
   let score = 0;
 
-  if (totalChecks === 0) {
+  if (isPriorityApplicant) {
+    // Mặc định đủ điều kiện và được ưu tiên — chỉ cần không thiếu dữ liệu
+    if (totalChecks === 0) {
+      result = "INSUFFICIENT_DATA";
+    } else {
+      // Ưu tiên luôn ELIGIBLE, nếu còn WARNING thì vẫn ELIGIBLE (không rớt xuống NEED_VERIFICATION/NOT_ELIGIBLE)
+      result = "ELIGIBLE";
+      score = 100;
+      if (warningCount > 0) {
+        details.push({
+          category: "Ưu tiên",
+          status: "INFO",
+          message: "Hồ sơ thuộc nhóm ưu tiên — được ưu tiên mua/thuê mua nhà ở xã hội. Vui lòng bổ sung giấy tờ theo checklist để hoàn thiện hồ sơ.",
+        });
+      }
+    }
+  } else if (totalChecks === 0) {
     result = "INSUFFICIENT_DATA";
   } else if (failCount > 0) {
     result = "NOT_ELIGIBLE";

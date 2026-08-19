@@ -9,7 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const APPLICANT_TYPES = [
-  { value: "CO_CONG", label: "Người có công với cách mạng, thân nhân liệt sĩ" },
+  { value: "CO_CONG", label: "Người có công với cách mạng" },
+  { value: "THAN_NHAN_LIET_SI", label: "Thân nhân liệt sĩ" },
+  { value: "NGUOI_KHUYET_TAT", label: "Người khuyết tật" },
+  { value: "TAI_DINH_CU", label: "Người được bố trí tái định cư (mua/thuê mua NOXH)" },
   { value: "NGHEO_NONG_THON", label: "Hộ nghèo, cận nghèo tại khu vực nông thôn" },
   { value: "NGHEO_THIEN_TAI", label: "Hộ nghèo, cận nghèo nông thôn vùng thiên tai, biến đổi khí hậu" },
   { value: "NGHEO_DO_THI", label: "Hộ nghèo, cận nghèo tại khu vực đô thị" },

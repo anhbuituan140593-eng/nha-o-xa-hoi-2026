@@ -235,12 +235,30 @@ function generateChecklist(result: string, data: Record<string, unknown>) {
     });
   }
 
-  // Applicant type specific documents (13 groups)
+  // Nhóm ưu tiên mặc định đủ điều kiện — ghi chú ưu tiên trong checklist
+  const priorityTypes = new Set(["CO_CONG", "THAN_NHAN_LIET_SI", "NGUOI_KHUYET_TAT", "TAI_DINH_CU"]);
+  const priorityNote = priorityTypes.has((data.applicantType as string)?.toUpperCase?.() ?? "")
+    ? " — Nhóm ưu tiên: mặc định đủ điều kiện và được ưu tiên mua/thuê mua NOXH"
+    : "";
+
+  // Applicant type specific documents (16 groups)
   const applicantType = data.applicantType as string;
   const typeDocs: Record<string, { itemName: string; description: string }> = {
     CO_CONG: {
-      itemName: "Giấy xác nhận người có công với cách mạng / thân nhân liệt sĩ",
-      description: "Xác nhận của Sở LĐ-TBXH hoặc cơ quan quản lý hồ sơ người có công",
+      itemName: "Giấy xác nhận người có công với cách mạng",
+      description: `Xác nhận của Sở LĐ-TBXH hoặc cơ quan quản lý hồ sơ người có công${priorityNote}`,
+    },
+    THAN_NHAN_LIET_SI: {
+      itemName: "Giấy xác nhận thân nhân liệt sĩ",
+      description: `Xác nhận của Sở LĐ-TBXH / Phòng LĐ-TBXH cấp huyện${priorityNote}`,
+    },
+    NGUOI_KHUYET_TAT: {
+      itemName: "Giấy xác nhận người khuyết tật",
+      description: `Giấy xác nhận khuyết tật do UBND cấp xã hoặc Hội đồng xác định mức độ khuyết tật cấp${priorityNote}`,
+    },
+    TAI_DINH_CU: {
+      itemName: "Quyết định bố trí tái định cư (mua/thuê mua NOXH)",
+      description: `Quyết định bố trí tái định cư của cơ quan có thẩm quyền cho phép mua/thuê mua NOXH${priorityNote}`,
     },
     NGHEO_NONG_THON: {
       itemName: "Giấy chứng nhận hộ nghèo/cận nghèo khu vực nông thôn",

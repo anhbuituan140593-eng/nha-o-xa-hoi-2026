@@ -178,52 +178,79 @@ export function evaluateEligibility(
   }
 
   // Evaluate housing condition
+  // Điều kiện mới: Tất cả đối tượng nếu chưa có nhà => Đủ điều kiện về nhà ở (không phụ thuộc rule)
   const housingRules = rules.filter((r) => r.category === "HOUSING_CONDITION");
-  if (housingRules.length > 0 && data.housingStatus) {
+  if (data.housingStatus) {
     const hs = data.housingStatus.toUpperCase();
 
     if (hs === "NO_OWNERSHIP") {
+      // Ưu tiên tuyệt đối: Chưa có nhà => PASS cho mọi đối tượng, kể cả khi chưa cấu hình rule HOUSING_CONDITION
       passCount++;
       details.push({
         category: "Nhà ở",
         status: "PASS",
-        message: "Chưa có nhà ở thuộc sở hữu của mình — đáp ứng điều kiện về nhà ở",
+        message: "Chưa có nhà ở thuộc sở hữu của mình — Đủ điều kiện về nhà ở (áp dụng cho tất cả đối tượng)",
       });
-    } else if (hs === "UNDER_15M2") {
-      passCount++;
-      details.push({
-        category: "Nhà ở",
-        status: "PASS",
-        message: "Diện tích nhà ở bình quân đầu người dưới 15m² sàn/người — đáp ứng điều kiện về nhà ở",
-      });
-    } else if (hs === "FAR_FROM_WORK") {
-      warningCount++;
-      details.push({
-        category: "Nhà ở",
-        status: "WARNING",
-        message: "Có nhà nhưng cách xa nơi làm việc — cần xác nhận theo quy định tỉnh/TP nơi làm việc",
-      });
-    } else if (hs === "OTHER") {
-      warningCount++;
-      details.push({
-        category: "Nhà ở",
-        status: "WARNING",
-        message: "Trường hợp đặc biệt — cần được chuyên viên tư vấn xem xét riêng theo quy định hiện hành",
-      });
+    } else if (housingRules.length > 0) {
+      if (hs === "UNDER_15M2") {
+        passCount++;
+        details.push({
+          category: "Nhà ở",
+          status: "PASS",
+          message: "Diện tích nhà ở bình quân đầu người dưới 15m² sàn/người — đáp ứng điều kiện về nhà ở",
+        });
+      } else if (hs === "FAR_FROM_WORK") {
+        warningCount++;
+        details.push({
+          category: "Nhà ở",
+          status: "WARNING",
+          message: "Có nhà nhưng cách xa nơi làm việc — cần xác nhận theo quy định tỉnh/TP nơi làm việc",
+        });
+      } else if (hs === "OTHER") {
+        warningCount++;
+        details.push({
+          category: "Nhà ở",
+          status: "WARNING",
+          message: "Trường hợp đặc biệt — cần được chuyên viên tư vấn xem xét riêng theo quy định hiện hành",
+        });
+      } else {
+        warningCount++;
+        details.push({
+          category: "Nhà ở",
+          status: "WARNING",
+          message: "Cần xác nhận tình trạng nhà ở theo quy định hiện hành",
+        });
+      }
     } else {
-      warningCount++;
-      details.push({
-        category: "Nhà ở",
-        status: "WARNING",
-        message: "Cần xác nhận tình trạng nhà ở theo quy định hiện hành",
-      });
+      // Không có rule nhà ở nhưng vẫn ghi nhận để không mất điểm kiểm tra
+      if (hs === "UNDER_15M2") {
+        passCount++;
+        details.push({
+          category: "Nhà ở",
+          status: "PASS",
+          message: "Diện tích nhà ở bình quân đầu người dưới 15m² sàn/người — đáp ứng điều kiện về nhà ở",
+        });
+      } else {
+        warningCount++;
+        details.push({
+          category: "Nhà ở",
+          status: "WARNING",
+          message: hs === "FAR_FROM_WORK"
+            ? "Có nhà nhưng cách xa nơi làm việc — cần xác nhận theo quy định tỉnh/TP nơi làm việc"
+            : hs === "OTHER"
+              ? "Trường hợp đặc biệt — cần được chuyên viên tư vấn xem xét riêng theo quy định hiện hành"
+              : "Cần xác nhận tình trạng nhà ở theo quy định hiện hành",
+        });
+      }
     }
   }
 
   // Evaluate employment
+  // Điều kiện mới: Không có HĐLĐ / lao động tự do / tự kinh doanh => Cần bổ sung thêm chứng minh thu nhập
   if (data.employmentType) {
-    const formalEmployment = ["CONTRACT", "CO_HOP_DONG"].includes(data.employmentType.toUpperCase());
-    const freelance = ["FREELANCE", "TU_DO", "KINH_DOANH_TU_DO"].includes(data.employmentType.toUpperCase());
+    const et = data.employmentType.toUpperCase();
+    const formalEmployment = ["CONTRACT", "CO_HOP_DONG"].includes(et);
+    const needIncomeProof = ["NO", "KHONG", "FREELANCE", "TU_DO", "BUSINESS", "KINH_DOANH_TU_DO", "TU_KINH_DOANH"].includes(et);
 
     if (formalEmployment) {
       passCount++;
@@ -232,12 +259,12 @@ export function evaluateEligibility(
         status: "PASS",
         message: "Có hợp đồng lao động hoặc cơ quan trả lương",
       });
-    } else if (freelance) {
+    } else if (needIncomeProof) {
       warningCount++;
       details.push({
         category: "Việc làm",
         status: "WARNING",
-        message: "Lao động tự do - cần chuẩn bị hồ sơ kê khai thu nhập theo quy định",
+        message: "Cần bổ sung thêm chứng minh thu nhập",
       });
     } else {
       warningCount++;

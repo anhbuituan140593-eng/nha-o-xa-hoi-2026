@@ -178,21 +178,21 @@ function generateChecklist(result: string, data: Record<string, unknown>) {
     });
   }
 
-  // Income documents
-  const employmentType = data.employmentType as string;
-  if (employmentType === "CONTRACT") {
+  // Income documents — đồng bộ với điều kiện: Không HĐLĐ / tự do / tự kinh doanh => cần chứng minh thu nhập
+  const employmentType = (data.employmentType as string)?.toUpperCase?.() ?? "";
+  if (["CONTRACT", "CO_HOP_DONG"].includes(employmentType)) {
     items.push({
       itemName: "Giấy xác nhận thu nhập",
       itemCategory: "INCOME",
       required: true,
       description: "Xác nhận của cơ quan/công ty trong 12 tháng gần nhất",
     });
-  } else if (["FREELANCE", "BUSINESS"].includes(employmentType)) {
+  } else if (["NO", "KHONG", "FREELANCE", "TU_DO", "BUSINESS", "KINH_DOANH_TU_DO", "TU_KINH_DOANH"].includes(employmentType)) {
     items.push({
-      itemName: "Tờ khai tự kê khai thu nhập",
+      itemName: "Hồ sơ chứng minh thu nhập (lao động tự do / không HĐLĐ / tự kinh doanh)",
       itemCategory: "INCOME",
       required: true,
-      description: "Theo mẫu quy định cho lao động tự do",
+      description: "Tờ khai tự kê khai thu nhập theo mẫu quy định, kèm sao kê/biên lai hoặc giấy xác nhận của UBND cấp xã (nếu được yêu cầu)",
     });
   }
 
